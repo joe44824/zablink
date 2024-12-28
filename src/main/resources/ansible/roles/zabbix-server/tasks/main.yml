@@ -1,0 +1,119 @@
+---
+- name: Download Zabbix repository package
+  get_url:
+    url: "{{ zabbix_repo_package_full_url }}"
+    dest: "{{ zabbix_repo_package_local_path }}"
+
+- name: Install Zabbix repository package
+  apt:
+    deb: "{{ zabbix_repo_package_local_path }}"
+
+- name: Install Zabbix Server dependencies
+  apt:
+    name:
+      - mysql-server
+      - zabbix-server-mysql
+      - zabbix-frontend-php
+      - zabbix-apache-conf
+      - zabbix-sql-scripts
+      - zabbix-agent2
+    state: present
+    update_cache: yes
+
+- name: Ensure pip3 is installed
+  apt:
+    name: python3-pip
+    state: present
+
+# - name: Install pymysql
+#   pip:
+#     name: pymysql
+#     executable: pip3
+
+- name: Install PyMySQL system-wide using apt
+  apt:
+    name: python3-pymysql
+    state: present
+
+- name: Create a new database with name "{{ zabbix_db_name }}"
+  community.mysql.mysql_db:
+    name: "{{ zabbix_db_name }}"
+    encoding: utf8mb4
+    collation: utf8mb4_bin
+    login_user: "{{ mysql_root_user }}"
+    login_password: "{{ mysql_root_password }}"
+    login_unix_socket: "{{ mysql_socket }}"
+    state: present
+
+- name: Create database user with name '{{ zabbix_db_user }}' with all privileges on '{{ zabbix_db_name }}'
+  community.mysql.mysql_user:
+    name: "{{ zabbix_db_user }}"
+    password: "{{ zabbix_db_password }}"
+    priv: "{{ zabbix_db_name }}.*:ALL"
+    column_case_sensitive: false
+    state: present
+    login_unix_socket: "{{ mysql_socket }}"
+    login_user: "{{ mysql_root_user }}"
+    login_password: "{{ mysql_root_password }}"
+
+- name: Set the global variable log_bin_trust_function_creators to 1
+  community.mysql.mysql_query:
+    login_user: "{{ mysql_root_user }}"
+    login_password: "{{ mysql_root_password }}"
+    query: "SET GLOBAL log_bin_trust_function_creators = 1;"
+    login_unix_socket: "{{ mysql_socket }}"
+
+- name: Check if 'history' table exists in Zabbix database
+  community.mysql.mysql_query:
+    login_user: "{{ zabbix_db_user }}"
+    login_password: "{{ zabbix_db_password }}"
+    login_unix_socket: "{{ mysql_socket }}"
+    login_db: "{{ zabbix_db_name }}"
+    query: "SHOW TABLES LIKE 'history';"
+  register: history_table_check
+
+- name: Determine if Zabbix schema import is required
+  set_fact:
+    zabbix_schema_import_required: "{{ history_table_check.query_result[0] | length == 0 }}"
+
+- name: Import Zabbix initial schema and data into MySQL
+  ansible.builtin.shell: |
+    zcat "{{ schema_file_path }}" | mysql --default-character-set=utf8mb4 -u{{ zabbix_db_user }} -p{{ zabbix_db_password }} {{ zabbix_db_name }}
+  args:
+    _uses_shell: true
+  when: zabbix_schema_import_required
+
+- name: Set the global variable log_bin_trust_function_creators back to 0
+  community.mysql.mysql_query:
+    login_user: "{{ mysql_root_user }}"
+    login_password: "{{ mysql_root_password }}"
+    query: "SET GLOBAL log_bin_trust_function_creators = 0;"
+    login_unix_socket: "{{ mysql_socket }}"
+
+- name: Set DBPassword in Zabbix server configuration
+  ansible.builtin.lineinfile:
+    path: "{{ zabbix_config_file }}"
+    regexp: "^#?DBPassword=.*"
+    line: "DBPassword={{ zabbix_db_password }}"
+    insertafter: "^# DBPassword="
+  notify: Restart Zabbix and Apache Services
+
+- name: Ensure Zabbix web configuration directory exists
+  file:
+    path: /etc/zabbix/web
+    state: directory
+    mode: "0755"
+
+- name: Generate Zabbix web configuration file
+  template:
+    src: zabbix.conf.php.j2
+    dest: /etc/zabbix/web/zabbix.conf.php
+    owner: www-data
+    group: www-data
+    mode: "0640"
+
+- name: Restart Apache to apply changes
+  service:
+    name: apache2
+    state: restarted
+    enabled: true

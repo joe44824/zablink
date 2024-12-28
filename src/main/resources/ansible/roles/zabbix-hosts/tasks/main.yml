@@ -1,0 +1,69 @@
+---
+- name: Fetch API token from Zabbix server
+  uri:
+    url: "{{ zabbix_api_url }}"
+    method: POST
+    headers:
+      Content-Type: "application/json"
+    body:
+      jsonrpc: "2.0"
+      method: "user.login"
+      params:
+        username: "{{ zabbix_user }}"
+        password: "{{ zabbix_password }}"
+      id: 1
+    body_format: json
+    return_content: yes
+  register: zabbix_response
+
+- name: Extract and store API token
+  set_fact:
+    zabbix_api_token: "{{ zabbix_response.json.result }}"
+  when: zabbix_response.json.result is defined
+
+- name: set connection specific variables
+  set_fact:
+    ansible_network_os: community.zabbix.zabbix
+    ansible_connection: httpapi
+    ansible_httpapi_port: 80
+    ansible_httpapi_use_ssl: false
+    ansible_httpapi_validate_certs: false
+    ansible_zabbix_url_path: "zabbix"
+
+- name: Set credentials to access Zabbix Server API
+  ansible.builtin.set_fact:
+    # ansible_user: Admin
+    # ansible_httpapi_pass: zabbix
+    ansible_zabbix_auth_key: "{{ zabbix_api_token }}"
+
+- name: Debug host groups after renaming
+  debug:
+    msg:
+      host: "{{ item }}"
+      host_groups_type: "{{ hostvars[item]['host_groups'] }}"
+      host_groups_value: "{{ hostvars[item]['host_groups'] }}"
+  with_items: "{{ groups['zabbix_agents'] }}"
+
+- name: Debug host templates after renaming
+  debug:
+    msg:
+      host: "{{ item }}"
+      host_groups_type: "{{ hostvars[item]['templates'] }}"
+      host_groups_value: "{{ hostvars[item]['templates'] }}"
+  with_items: "{{ groups['zabbix_agents'] }}"
+
+- name: Create or update Zabbix hosts
+  community.zabbix.zabbix_host:
+    host_name: "{{ hostvars[item]['name'] }}"
+    visible_name: "{{ hostvars[item]['name'] }}"
+    host_groups: "{{ hostvars[item]['host_groups'] }}"
+    link_templates: "{{ hostvars[item]['templates'] }}"
+    status: enabled
+    state: present
+    interfaces:
+      - type: 1
+        main: 1
+        ip: "{{ hostvars[item]['ansible_host'] }}"
+        useip: 1
+        port: "10050"
+  with_items: "{{ groups['zabbix_agents'] }}"

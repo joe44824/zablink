@@ -1,0 +1,28 @@
+---
+- name: Download Zabbix release package
+  ansible.builtin.get_url:
+    url: "{{ zabbix_repo_url }}"
+    dest: "/tmp/{{ zabbix_release_file }}"
+
+- name: Install Zabbix release package
+  ansible.builtin.apt:
+    deb: "/tmp/{{ zabbix_release_file }}"
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install Zabbix Agent 2 and plugins
+  ansible.builtin.apt:
+    name: "{{ zabbix_packages }}"
+    state: present
+
+- name: Deploy Zabbix Agent 2 configuration
+  ansible.builtin.template:
+    src: "zabbix_agent2.conf.j2"
+    dest: "{{ zabbix_agent_config_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart Zabbix Agent 2

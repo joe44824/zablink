@@ -1,0 +1,10 @@
+---
+- hosts: zabbix_agents
+  gather_facts: True
+  become: true
+  gather_subset:
+    - network
+  vars_files:
+    - vars.yml
+  roles:
+    - zabbix-agents

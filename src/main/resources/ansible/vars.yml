@@ -1,0 +1,17 @@
+zabbix_version: "7.0"
+mysql_root_user: root
+mysql_root_password: password
+zabbix_db_user: zabbix
+zabbix_db_password: password
+zabbix_db_name: zabbix
+zabbix_user: Admin
+zabbix_password: zabbix
+ansible_python_interpreter: /usr/bin/python3
+
+
+
+
+mysql_socket: /var/run/mysqld/mysqld.sock
+
+
+

@@ -1,0 +1,10 @@
+ansible:
+  base-dir: "src/main/resources/ansible"
+  inventory-dir: "inventory.yml"
+  group-vars: "group_vars/vars.yml"
+  roles-dir: "roles"
+  ssh-key-dir: "~/.ssh/zablink-joex42"
+  playbooks:
+    agents: "00-zabbix-agents.yml"
+    hosts: "00-zabbix-hosts.yml"
+    server: "00-zabbix-server.yml"

@@ -1,0 +1,14 @@
+server:
+  port: 8081
+
+spring:
+  config:
+    import: ansible-config.yml
+  devtools:
+    livereload:
+      enabled: false
+
+
+
+
+
