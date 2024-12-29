@@ -36,21 +36,21 @@
     # ansible_httpapi_pass: zabbix
     ansible_zabbix_auth_key: "{{ zabbix_api_token }}"
 
-- name: Debug host groups after renaming
-  debug:
-    msg:
-      host: "{{ item }}"
-      host_groups_type: "{{ hostvars[item]['host_groups'] }}"
-      host_groups_value: "{{ hostvars[item]['host_groups'] }}"
-  with_items: "{{ groups['zabbix_agents'] }}"
+# - name: Debug host groups after renaming
+#   debug:
+#     msg:
+#       host: "{{ item }}"
+#       host_groups_type: "{{ hostvars[item]['host_groups'] }}"
+#       host_groups_value: "{{ hostvars[item]['host_groups'] }}"
+#   with_items: "{{ groups['zabbix_agents'] }}"
 
-- name: Debug host templates after renaming
-  debug:
-    msg:
-      host: "{{ item }}"
-      host_groups_type: "{{ hostvars[item]['templates'] }}"
-      host_groups_value: "{{ hostvars[item]['templates'] }}"
-  with_items: "{{ groups['zabbix_agents'] }}"
+# - name: Debug host templates after renaming
+#   debug:
+#     msg:
+#       host: "{{ item }}"
+#       host_groups_type: "{{ hostvars[item]['templates'] }}"
+#       host_groups_value: "{{ hostvars[item]['templates'] }}"
+#   with_items: "{{ groups['zabbix_agents'] }}"
 
 - name: Create or update Zabbix hosts
   community.zabbix.zabbix_host:
