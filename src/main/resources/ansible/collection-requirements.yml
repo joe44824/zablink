@@ -1,1 +1,6 @@
+---
+collections:
+  - community.mysql
+  - community.general
+  - community.zabbix
 
