@@ -1,0 +1,6 @@
+---
+- name: Linux VM Health Check
+  hosts: all
+  become: yes
+  roles:
+    - health_check

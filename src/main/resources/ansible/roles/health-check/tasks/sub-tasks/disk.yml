@@ -1,0 +1,7 @@
+---
+- name: Check disk usage
+  command: df -h
+  register: disk_usage
+- name: Display disk usage
+  debug:
+    var: disk_usage.stdout

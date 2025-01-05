@@ -1,0 +1,7 @@
+---
+- name: Check for package updates
+  command: apt list --upgradable || yum check-update || true
+  register: updates
+- name: Display available updates
+  debug:
+    var: updates.stdout

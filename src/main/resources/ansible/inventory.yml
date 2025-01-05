@@ -1,18 +1,18 @@
 all:
   hosts:
     zabbix_server_01:
-      ansible_host: 152.42.244.44
+      ansible_host: 152.42.217.248
       host_groups:
         - "Linux servers"
     zabbix_agent_01:
-      ansible_host: 206.189.146.128
+      ansible_host: 128.199.88.171
       name: zabbix-host-01
       host_groups:
         - "Linux servers"
       templates:
         - "Linux by Zabbix agent"
     zabbix_agent_02:
-      ansible_host: 206.189.151.189
+      ansible_host: 188.166.221.240
       name: zabbix-host-02
       host_groups:
         - "Linux servers"

@@ -1,0 +1,7 @@
+---
+- name: Check CPU usage
+  command: uptime
+  register: cpu_usage
+- name: Display CPU usage
+  debug:
+    var: cpu_usage.stdout

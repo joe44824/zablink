@@ -1,0 +1,7 @@
+---
+- name: Check network usage
+  command: ifconfig
+  register: network_usage
+- name: Display network usage
+  debug:
+    var: network_usage.stdout

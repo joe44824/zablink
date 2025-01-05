@@ -1,0 +1,9 @@
+---
+- include_tasks: "{{ role_path }}/sub_tasks/disk.yml"
+- include_tasks: "{{ role_path }}/sub_tasks/memory.yml"
+- include_tasks: "{{ role_path }}/sub_tasks/cpu.yml"
+- include_tasks: "{{ role_path }}/sub_tasks/network.yml"
+- include_tasks: "{{ role_path }}/sub_tasks/security.yml"
+- include_tasks: "{{ role_path }}/sub_tasks/system.yml"
+- include_tasks: "{{ role_path }}/sub_tasks/hardware.yml"
+- include_tasks: "{{ role_path }}/sub_tasks/software.yml"

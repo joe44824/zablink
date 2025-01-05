@@ -1,8 +1,15 @@
 zabbix_repo_base_url: "https://repo.zabbix.com/zabbix"
 ubuntu_version: "{{ ansible_distribution_version }}"
+
+
 zabbix_repo_url: "{{ zabbix_repo_base_url }}/{{ zabbix_version }}/ubuntu/pool/main/z/zabbix-release/"
+
 zabbix_repo_package: "zabbix-release_latest+ubuntu{{ ubuntu_version }}_all.deb"
 zabbix_repo_package_full_url: "{{ zabbix_repo_url }}{{ zabbix_repo_package }}"
+
+
+
+
 temp_dir: "/tmp"
 zabbix_repo_package_local_path: "{{ temp_dir }}/{{ zabbix_repo_package }}"
 

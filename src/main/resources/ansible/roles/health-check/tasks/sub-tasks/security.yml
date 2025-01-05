@@ -1,0 +1,21 @@
+---
+- name: List users
+  command: cat /etc/passwd
+  register: user_list
+- name: Display user list
+  debug:
+    var: user_list.stdout
+
+- name: Check open ports
+  command: ss -tuln
+  register: open_ports
+- name: Display open ports
+  debug:
+    var: open_ports.stdout
+
+- name: Check firewall status
+  command: ufw status
+  register: firewall_status
+- name: Display firewall status
+  debug:
+    var: firewall_status.stdout

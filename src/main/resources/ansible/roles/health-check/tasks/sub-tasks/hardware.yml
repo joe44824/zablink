@@ -1,0 +1,14 @@
+---
+- name: Check disk health (SMART)
+  command: smartctl -a /dev/sda || true
+  register: disk_health
+- name: Display disk health
+  debug:
+    var: disk_health.stdout
+
+- name: Check hardware info
+  command: lshw -short
+  register: hardware_info
+- name: Display hardware info
+  debug:
+    var: hardware_info.stdout

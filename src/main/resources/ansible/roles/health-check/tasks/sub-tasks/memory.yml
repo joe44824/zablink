@@ -1,0 +1,7 @@
+---
+- name: Check memory usage
+  command: free -h
+  register: memory_usage
+- name: Display memory usage
+  debug:
+    var: memory_usage.stdout

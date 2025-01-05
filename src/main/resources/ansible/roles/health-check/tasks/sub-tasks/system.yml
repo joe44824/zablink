@@ -1,0 +1,14 @@
+---
+- name: Check system uptime
+  command: uptime
+  register: system_uptime
+- name: Display system uptime
+  debug:
+    var: system_uptime.stdout
+
+- name: Analyze logs for errors
+  command: grep "ERROR" /var/log/syslog || true
+  register: log_errors
+- name: Display log errors
+  debug:
+    var: log_errors.stdout
