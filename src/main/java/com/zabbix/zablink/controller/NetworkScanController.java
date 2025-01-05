@@ -1,10 +1,12 @@
 package com.zabbix.zablink.controller;
 
+import com.zabbix.zablink.model.Host;
+import com.zabbix.zablink.service.NetworkScanService;
+import com.zabbix.zablink.service.HostDetailsService;
+import com.zabbix.zablink.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.zabbix.zablink.service.NetworkScanService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,25 +18,31 @@ public class NetworkScanController {
     @Autowired
     private NetworkScanService networkScanService;
 
-    @GetMapping("/scan-network")
-    public String scanNetwork() {
-        try {
-            List<String> allLiveHosts = new ArrayList<>();
-            List<String> privateCIDRs = networkScanService.getPrivateCIDRs();
+    @Autowired
+    private HostDetailsService hostDetailsService;
 
-            for (String cidr : privateCIDRs) {
-                List<String> liveHosts = networkScanService.scanNetwork(cidr);
-                allLiveHosts.addAll(liveHosts);
+    @Autowired
+    private InventoryService inventoryService;
+
+    @GetMapping("/scan-network")
+    public List<Host> scanNetwork() {
+        try {
+            // Step 1: Scan the network and get live hosts
+            List<String> liveHosts = networkScanService.scanNetwork();
+
+            // Step 2: Fetch details for each live host
+            List<Host> hostDetails = new ArrayList<>();
+            for (String ip : liveHosts) {
+                hostDetails.add(hostDetailsService.getHostDetails(ip));
             }
 
-            System.out.println("Scanned IPs");
-            System.out.println(allLiveHosts);
+            // Step 3: Save the inventory to a YAML file
+            inventoryService.saveToYamlFile(liveHosts);
 
-            networkScanService.saveToYamlFile(allLiveHosts);
-            return "Scan complete. Inventory saved to src/main/resources/ansible/inventory.yml";
+            return hostDetails;
 
         } catch (IOException | InterruptedException e) {
-            return "Error during network scan: " + e.getMessage();
+            throw new RuntimeException("Error during network scan: " + e.getMessage());
         }
     }
 }
