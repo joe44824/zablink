@@ -1,6 +1,6 @@
 # Variables
 PYTHON_ENV=venv
-ANSIBLE_REQUIREMENTS=collection-requirements.yml
+ANSIBLE_REQUIREMENTS=src/main/resources/ansible/collection-requirements.yml
 
 # Install dependencies
 install-dependencies:
