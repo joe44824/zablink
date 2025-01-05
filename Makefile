@@ -1,35 +1,39 @@
 # Variables
-APP_JAR=$(shell ls target/*.jar 2>/dev/null)
-MVNW=./mvnw
+PYTHON_ENV=venv
+ANSIBLE_REQUIREMENTS=collection-requirements.yml
 
 # Install dependencies
 install-dependencies:
 	sudo apt update
-	sudo apt install openjdk-17-jdk -y
-	sudo apt install python3-pip -y
-	pip3 install --upgrade ansible
+	sudo apt install -y openjdk-17-jdk python3-pip python3-venv
+	python3 -m venv $(PYTHON_ENV)
+	. $(PYTHON_ENV)/bin/activate && pip install --upgrade pip ansible
 
 # Install Ansible modules
 install-ansible-modules:
-	ansible-galaxy collection install -r src/main/resources/ansible/collection-requirements.yml
+	. $(PYTHON_ENV)/bin/activate && ansible-galaxy collection install -r $(ANSIBLE_REQUIREMENTS)
 
 # Build the project
 build:
-	$(MVNW) clean package
+	./mvnw clean package
 
-# Run the app
+# Run the application
 run:
-	@if [ -z "$(APP_JAR)" ]; then \
+	@if [ ! -d "$(PYTHON_ENV)" ]; then \
+		echo "Python environment not found. Please run 'make install-dependencies' first."; \
+		exit 1; \
+	fi
+	@if [ ! -f target/*.jar ]; then \
 		echo "Application JAR not found. Please run 'make build' first."; \
 		exit 1; \
-	else \
-		java -jar $(APP_JAR); \
 	fi
+	java -jar target/*.jar
 
 # Clean project
 clean:
-	$(MVNW) clean
+	./mvnw clean
 	rm -rf target/
+	rm -rf $(PYTHON_ENV)
 
 # Combined setup and run
 setup:
