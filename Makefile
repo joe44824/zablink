@@ -5,7 +5,7 @@ ANSIBLE_REQUIREMENTS=src/main/resources/ansible/collection-requirements.yml
 # Install dependencies
 install-dependencies:
 	sudo apt update
-	sudo apt install -y openjdk-17-jdk python3-pip python3-venv
+	sudo apt install -y openjdk-17-jdk python3-pip python3-venv nmap
 	python3 -m venv $(PYTHON_ENV)
 	. $(PYTHON_ENV)/bin/activate && pip install --upgrade pip ansible
 
