@@ -27,6 +27,9 @@ public class NetworkScanController {
                 allLiveHosts.addAll(liveHosts);
             }
 
+            System.out.println("Scanned IPs");
+            System.out.println(allLiveHosts);
+
             networkScanService.saveToYamlFile(allLiveHosts);
             return "Scan complete. Inventory saved to src/main/resources/ansible/inventory.yml";
 
