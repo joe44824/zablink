@@ -1,6 +1,7 @@
 package com.zabbix.zablink.controller;
 
 import com.zabbix.zablink.service.NetworkScanService;
+import com.zabbix.zablink.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.zabbix.zablink.service.HostFactsPlaybookService;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -21,21 +21,19 @@ public class NetworkScanController {
     private HostFactsPlaybookService hostFactsPlaybookService;
 
     @GetMapping("/scan-network")
-    public List<String> scanNetwork() {
+    public String scanNetwork() {
         try {
 
             // 1. get ips
-            ArrayList<String> allLiveHosts = (ArrayList<String>) networkScanService.scanNetwork();
-
-            System.out.println(allLiveHosts);
+            List<String> allLiveHosts = networkScanService.scanNetwork();
 
             // 2. save ips to ini file
-            networkScanService.saveToInventoryFile(allLiveHosts);
+            // networkScanService.saveToInventoryFile(allLiveHosts);
 
-            // 3. based on ini file, call ansible playbook ()
-            // hostFactsPlaybookService.execute();
+            // . based on ini file, call ansible playbook ()
+            hostFactsPlaybookService.execute();
 
-            return allLiveHosts;
+            return "Scan complete. Inventory saved to src/main/resources/ansible/inventory.yml";
 
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Error during network scan: " + e.getMessage());

@@ -32,6 +32,8 @@ public class NetworkScanService extends AnsibleBaseService {
                     .collect(Collectors.toList()));
         }
 
+        System.out.println("TEST");
+
         return liveHosts;
     }
 
