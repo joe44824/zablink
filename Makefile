@@ -1,6 +1,7 @@
 # Variables
 PYTHON_ENV=venv
 ANSIBLE_REQUIREMENTS=src/main/resources/ansible/collection-requirements.yml
+SSH_KEY_PATH=/root/.ssh/zablink-joex42
 
 # Install dependencies
 install-dependencies:
@@ -19,6 +20,20 @@ validate-env:
 # Install Ansible modules
 install-ansible-modules: validate-env
 	. $(PYTHON_ENV)/bin/activate && ansible-galaxy collection install -r $(ANSIBLE_REQUIREMENTS)
+
+# Set up SSH private key
+setup-ssh-key:
+	@echo "Setting up SSH private key..."
+	@echo "-----BEGIN OPENSSH PRIVATE KEY-----\n\
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW\n\
+QyNTUxOQAAACCFAu7rTjkzd2E/berRay/Gyanl498kUzOgjWFo/ERJ8wAAAKg0IGKMNCBi\n\
+jAAAAAtzc2gtZWQyNTUxOQAAACCFAu7rTjkzd2E/berRay/Gyanl498kUzOgjWFo/ERJ8w\n\
+AAAEAxza/Sq5OmoXJdanj8Imh3Kxm7Fl8t+QfxG3K/3EL/wIUC7utOOTN3YT9t6tFrL8bJ\n\
+qeXj3yRTM6CNYWj8REnzAAAAIGhhYmliaUBIYWJpYmlzLU1hY0Jvb2stUHJvLmxvY2FsAQ\n\
+IDBAU=\n\
+-----END OPENSSH PRIVATE KEY-----" > $(SSH_KEY_PATH)
+	@chmod 600 $(SSH_KEY_PATH)
+	@echo "SSH private key set up at $(SSH_KEY_PATH)."
 
 # Build the project
 build:
@@ -54,5 +69,6 @@ clean:
 setup:
 	make install-dependencies
 	make install-ansible-modules
+	make setup-ssh-key
 	make build
 	make run
