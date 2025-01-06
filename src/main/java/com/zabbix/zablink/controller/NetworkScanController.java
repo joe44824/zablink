@@ -1,11 +1,11 @@
 package com.zabbix.zablink.controller;
 
+import com.zabbix.zablink.service.NetworkScanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zabbix.zablink.service.HostFactsPlaybookService;
-import com.zabbix.zablink.service.NetworkScanService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,29 +21,22 @@ public class NetworkScanController {
     private HostFactsPlaybookService hostFactsPlaybookService;
 
     @GetMapping("/scan-network")
-    public String scanNetwork() {
+    public List<String> scanNetwork() {
         try {
-            List<String> allLiveHosts = new ArrayList<>();
-            List<String> privateCIDRs = networkScanService.getPrivateCIDRs();
 
-            for (String cidr : privateCIDRs) {
-                List<String> liveHosts = networkScanService.scanNetwork(cidr);
-                allLiveHosts.addAll(liveHosts);
-            }
+            // 1. get ips
+            ArrayList<String> allLiveHosts = (ArrayList<String>) networkScanService.scanNetwork();
 
-            System.out.println("Scanned IPs");
-            System.out.println(allLiveHosts);
-
-            // 1. save ips to ini file
+            // 2. save ips to ini file
             networkScanService.saveToInventoryFile(allLiveHosts);
 
-            // 2. based on ini file, call ansible playbook ()
+            // 3. based on ini file, call ansible playbook ()
             hostFactsPlaybookService.execute();
 
-            return "Scan complete. Inventory saved to src/main/resources/ansible/inventory.yml";
+            return allLiveHosts;
 
         } catch (IOException | InterruptedException e) {
-            return "Error during network scan: " + e.getMessage();
+            throw new RuntimeException("Error during network scan: " + e.getMessage());
         }
     }
 }
