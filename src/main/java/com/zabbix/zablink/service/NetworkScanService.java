@@ -1,45 +1,22 @@
 package com.zabbix.zablink.service;
 
 import org.springframework.stereotype.Service;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class NetworkScanService extends AnsibleBaseService {
+public class NetworkScanService {
 
     private static final String INVENTORY_FILE_PATH = "src/main/resources/ansible/inventory.yml";
 
-    public List<String> scanNetwork() throws IOException, InterruptedException {
-        List<String> privateCIDRs = getPrivateCIDRs();
-        List<String> liveHosts = new ArrayList<>();
-
-        for (String cidr : privateCIDRs) {
-            Process process = new ProcessBuilder("nmap", "-sn", cidr).start();
-            process.waitFor();
-
-            liveHosts.addAll(new String(process.getInputStream().readAllBytes())
-                    .lines()
-                    .filter(line -> line.contains("Nmap scan report for"))
-                    .map(line -> line.substring(line.lastIndexOf(' ') + 1).replace("(", "").replace(")", ""))
-                    .filter(ip -> !ip.endsWith(".1"))
-                    .collect(Collectors.toList()));
-        }
-
-        System.out.println("TEST");
-
-        return liveHosts;
-    }
-
-    private List<String> getPrivateCIDRs() throws IOException, InterruptedException {
+    public List<String> getPrivateCIDRs() throws IOException, InterruptedException {
         Process process = new ProcessBuilder("bash", "-c",
-                "ip -4 addr show | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}/\\d+' | grep -E '^10\\.|^172\\.(1[6-9]|2[0-9]|3[0-1])\\.|^192\\.168\\.'")
+                "ip -4 addr show | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}/\\d+' | grep -E '^10\\.|^172\\.(1[6-9]|2[0-9]|3[0-1])\\.|^192\\.168\\.' | tail -n +2")
                 .start();
         process.waitFor();
 
@@ -49,7 +26,19 @@ public class NetworkScanService extends AnsibleBaseService {
                 .collect(Collectors.toList());
     }
 
-    public void saveToInventoryFile(List<String> liveHosts) throws IOException {
+    public List<String> scanNetwork(String cidr) throws IOException, InterruptedException {
+        Process process = new ProcessBuilder("nmap", "-sn", cidr).start();
+        process.waitFor();
+
+        return new String(process.getInputStream().readAllBytes())
+                .lines()
+                .filter(line -> line.contains("Nmap scan report for"))
+                .map(line -> line.substring(line.lastIndexOf(' ') + 1).replace("(", "").replace(")", ""))
+                .filter(ip -> !ip.endsWith(".1"))
+                .collect(Collectors.toList());
+    }
+
+    public void saveToYamlFile(List<String> liveHosts) throws IOException {
         Path filePath = Paths.get(INVENTORY_FILE_PATH);
         Files.createDirectories(filePath.getParent()); // Ensure the directory exists
 
