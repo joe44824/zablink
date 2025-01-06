@@ -27,11 +27,13 @@ public class NetworkScanController {
             // 1. get ips
             ArrayList<String> allLiveHosts = (ArrayList<String>) networkScanService.scanNetwork();
 
+            System.out.println(allLiveHosts);
+
             // 2. save ips to ini file
             networkScanService.saveToInventoryFile(allLiveHosts);
 
             // 3. based on ini file, call ansible playbook ()
-            hostFactsPlaybookService.execute();
+            // hostFactsPlaybookService.execute();
 
             return allLiveHosts;
 
