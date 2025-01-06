@@ -1,0 +1,53 @@
+- name: Print role_path
+  debug:
+    msg: "Role path is {{ role_path }}"
+
+- name: Ensure the destination directory exists on the remote host
+  file:
+    path: "/tmp/ansible_output"
+    state: directory
+    mode: '0755'
+
+- name: Check if host is reachable
+  ping:
+  register: ping_result
+
+- name: Save result if host is reachable
+  copy:
+    content: |
+      {
+        "hostname": "{{ ansible_facts.hostname }}",
+        "uptime_seconds": "{{ ansible_facts.uptime_seconds }}",
+        "bios_date": "{{ ansible_facts.bios_date }}",
+        "os_version": "{{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
+      }
+    dest: "/tmp/ansible_output/system_info_reachable.json"
+  when: ping_result.ping is defined and ping_result.ping == 'pong'
+
+- name: Save result if host is unreachable
+  copy:
+    content: |
+      {
+        "hostname": null,
+        "uptime_seconds": null,
+        "bios_date": null,
+        "os_version": null,
+        "status": "Host unreachable"
+      }
+    dest: "/tmp/ansible_output/system_info_unreachable.json"
+  when: ping_result.ping is not defined or ping_result.ping != 'pong'
+
+
+- name: Fetch reachable result to the control node
+  fetch:
+    src: "/tmp/ansible_output/system_info_reachable.json"
+    dest: "./host_facts/reachable/{{ inventory_hostname }}.json"
+    flat: yes
+  when: ping_result.ping is defined and ping_result.ping == 'pong'
+
+- name: Fetch unreachable result to the control node
+  fetch:
+    src: "/tmp/ansible_output/system_info_unreachable.json"
+    dest: "./host_facts/unreachable/{{ inventory_hostname }}.json"
+    flat: yes
+  when: ping_result.ping is not defined or ping_result.ping != 'pong'

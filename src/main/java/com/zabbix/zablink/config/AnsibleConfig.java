@@ -24,6 +24,7 @@ public class AnsibleConfig {
         private String agents;
         private String hosts;
         private String server;
+        private String hostFacts;
     }
 
     @PostConstruct
@@ -37,6 +38,7 @@ public class AnsibleConfig {
         System.out.println("Agents Playbook: " + playbooks.getAgents());
         System.out.println("Hosts Playbook: " + playbooks.getHosts());
         System.out.println("Server Playbook: " + playbooks.getServer());
+        System.out.println("HostFacts Playbook: " + playbooks.getHostFacts());
         System.out.println("======================");
     }
 }

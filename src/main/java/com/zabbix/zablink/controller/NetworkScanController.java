@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zabbix.zablink.service.HostFactsPlaybookService;
 import com.zabbix.zablink.service.NetworkScanService;
 
 import java.io.IOException;
@@ -15,6 +16,9 @@ public class NetworkScanController {
 
     @Autowired
     private NetworkScanService networkScanService;
+
+    @Autowired
+    private HostFactsPlaybookService hostFactsPlaybookService;
 
     @GetMapping("/scan-network")
     public String scanNetwork() {
@@ -30,7 +34,12 @@ public class NetworkScanController {
             System.out.println("Scanned IPs");
             System.out.println(allLiveHosts);
 
-            networkScanService.saveToYamlFile(allLiveHosts);
+            // 1. save ips to ini file
+            networkScanService.saveToInventoryFile(allLiveHosts);
+
+            // 2. based on ini file, call ansible playbook ()
+            hostFactsPlaybookService.execute();
+
             return "Scan complete. Inventory saved to src/main/resources/ansible/inventory.yml";
 
         } catch (IOException | InterruptedException e) {

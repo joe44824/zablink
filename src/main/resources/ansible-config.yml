@@ -8,3 +8,4 @@ ansible:
     agents: "00-zabbix-agents.yml"
     hosts: "00-zabbix-hosts.yml"
     server: "00-zabbix-server.yml"
+    host-facts: "00-host-facts.yml"

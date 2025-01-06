@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class NetworkScanService {
+public class NetworkScanService extends AnsibleBaseService {
 
     private static final String INVENTORY_FILE_PATH = "src/main/resources/ansible/inventory.yml";
 
@@ -40,7 +40,7 @@ public class NetworkScanService {
                 .collect(Collectors.toList());
     }
 
-    public void saveToYamlFile(List<String> liveHosts) throws IOException {
+    public void saveToInventoryFile(List<String> liveHosts) throws IOException {
         Path filePath = Paths.get(INVENTORY_FILE_PATH);
         Files.createDirectories(filePath.getParent()); // Ensure the directory exists
 
