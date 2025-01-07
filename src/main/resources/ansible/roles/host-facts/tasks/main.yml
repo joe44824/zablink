@@ -19,7 +19,8 @@
         "hostname": "{{ ansible_facts.hostname }}",
         "uptime_seconds": "{{ ansible_facts.uptime_seconds }}",
         "bios_date": "{{ ansible_facts.bios_date }}",
-        "os_version": "{{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
+        "os_version": "{{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}",
+        "ip": "{{ ansible_host }}"
       }
     dest: "/tmp/ansible_output/system_info_reachable.json"
   when: ping_result.ping is defined and ping_result.ping == 'pong'
@@ -32,7 +33,8 @@
         "uptime_seconds": null,
         "bios_date": null,
         "os_version": null,
-        "status": "Host unreachable"
+        "status": "Host unreachable",
+        "ip": "{{ ansible_host }}"
       }
     dest: "/tmp/ansible_output/system_info_unreachable.json"
   when: ping_result.ping is not defined or ping_result.ping != 'pong'

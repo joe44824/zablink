@@ -12,4 +12,5 @@ public class HostFact {
     private String uptimeSeconds;
     private String biosDate;
     private String osVersion;
+    private String ip;
 }
