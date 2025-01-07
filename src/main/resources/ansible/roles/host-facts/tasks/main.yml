@@ -25,6 +25,28 @@
     dest: "/tmp/ansible_output/system_info_reachable.json"
   when: ping_result.ping is defined and ping_result.ping == 'pong'
 
+- name: Get all IPv4 addresses from ansible facts
+  set_fact:
+    all_ipv4: "{{ ansible_all_ipv4_addresses | default([]) }}"
+
+- name: Filter private IPv4 addresses
+  set_fact:
+    private_ips: >-
+      {{
+        all_ipv4 | select("match", "^(10\\.|172\\.(1[6-9]|2[0-9]|3[0-1])\\.|192\\.168\\.)") | list
+      }}
+
+- name: Print private IPv4 addresses
+  debug:
+    msg: "Private IPv4 addresses for {{ inventory_hostname }}: {{ private_ips }}"
+  when: private_ips | length > 0
+
+- name: Print message if no private IPv4 addresses found
+  debug:
+    msg: "No private IPv4 addresses found for {{ inventory_hostname }}"
+  when: private_ips | length == 0
+
+
 - name: Save result if host is unreachable
   copy:
     content: |
