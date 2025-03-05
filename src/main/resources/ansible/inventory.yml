@@ -1,8 +1,8 @@
 all:
   hosts:
     zabbix_server_01:
-      ansible_host: 188.166.254.195
+      ansible_host: 64.23.172.34
     zabbix_agent_01:
-      ansible_host: 128.199.88.171
+      ansible_host: 24.144.89.55
     zabbix_agent_02:
-      ansible_host: 188.166.221.240
+      ansible_host: 64.23.172.34
