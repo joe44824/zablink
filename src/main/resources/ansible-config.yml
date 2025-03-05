@@ -3,7 +3,7 @@ ansible:
   inventory-dir: "inventory.yml"
   group-vars: "group_vars/vars.yml"
   roles-dir: "roles"
-  ssh-key-dir: "~/.ssh/zablink-joex42"
+  ssh-key-dir: "~/.ssh/digital-ocean-2201190"
   playbooks:
     agents: "00-zabbix-agents.yml"
     hosts: "00-zabbix-hosts.yml"
